@@ -5,6 +5,8 @@
 namespace tcp_server {
 namespace internal {
 
+using tcp = boost::asio::ip::tcp;
+
 std::shared_ptr<Connection> Connection::Create(
     boost::asio::io_context& io_context,
     MessageHandler message_handler) {
