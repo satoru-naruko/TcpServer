@@ -1,0 +1,102 @@
+# Cursor Coding Rules for TCP Server Project
+
+## 1. Language & Standard
+- **C++17** を採用する。  
+  - `-std=c++17` を必ず指定。  
+  - 将来アップグレードする際は互換性を事前に確認すること。
+
+## 2. Style Guide
+- **Google C++ Style Guide** を全面的に適用。  
+  - `clang-format` で `Google` プリセットをベースに、下記追加設定を行う。  
+    ```yaml
+    IndentWidth:        2
+    ColumnLimit:        100
+    AllowShortFunctionsOnASingleLine: InlineOnly
+    ```
+- ファイル名は `lower_snake_case.cpp / .h`。  
+- 名前空間は `<project>::net` など階層化して衝突を防ぐ。
+
+## 3. Tooling
+| 目的                | 推奨ツール / 設定 |
+|---------------------|-------------------|
+| Lint                | `clang-tidy -checks=*,-fuchsia-*` |
+| 静的解析            | `cppcheck --std=c++17 --enable=all` |
+| 依存管理            | `vcpkg` or `conan` (バージョン固定) |
+| ビルド              | `CMake >= 3.20` (out-of-source) |
+
+## 4. メモリ管理
+- **スマートポインタをデフォルト**  
+  - 所有権移動は `std::unique_ptr`、共有は `std::shared_ptr`。  
+  - 生ポインタは「非所有」かつ **nullptr** 許容用途のみに限定。
+- **Boost.Pool** + **カスタムアロケータ**  
+  - 頻繁に生成/破棄するメッセージバッファは `boost::pool_allocator<uint8_t>`。
+  - 大量小分配用に `boost::object_pool<T>` を活用。
+- `new/delete` の直接使用は禁止。例外は `placement new` を使う明確な理由がある場合のみ。
+
+## 5. ネットワーク
+- **Boost.Asio (ヘッダオンリーモード)**  
+  - 非同期 API (`async_*`) を標準とする。  
+  - `io_context` は 1 プロセス 1 インスタンス。スレッド数はハードウェア並列数。  
+  - タイムアウトは `steady_timer` で実装し、マジックナンバー禁止。
+
+## 6. エラー処理
+1. **例外** を原則利用（`throw`／`try-catch`）。  
+2. 非例外ビルドが必要な場合は `BOOST_NO_EXCEPTIONS` を定義し、`error_code` にフォールバック。  
+3. すべての public 関数は成功／失敗をドキュメント化。
+
+## 7. ロギング
+- `spdlog` を使用。  
+  - ログレベルは **trace / debug / info / warn / error / critical**。  
+  - 例外捕捉部では必ず `error` 以上を出力。  
+  - 個人情報や鍵素材はログに残さない。
+
+## 8. テスト
+- フレームワークは **GoogleTest**。  
+- 非同期コードは `asio::io_context::run_for()` を用いた時間制限付きテストを行う。  
+- 最低限：  
+  - 100% コンパイル
+  - 80% ステートメントカバレッジ
+  - 100% クリティカルパス
+
+## 9. セキュリティ
+- 外部入力は **必ず**バリデーション。  
+- TLS が必要な場合は `Boost.Asio::ssl` + **OpenSSL ≥ 3.0**。  
+- 静的解析ツールのセキュリティチェックを CI に組み込む。
+
+## 10. CI / CD
+- GitHub Actions (例)  
+  1. **clang-format** チェック  
+  2. ビルド & ユニットテスト（Ubuntu / Windows）  
+  3. `clang-tidy` & `cppcheck`  
+  4. カバレッジレポート送信
+
+## 11. 命名規則（補足）
+| 種類           | 規則                 | 例                 |
+|----------------|----------------------|--------------------|
+| クラス          | `UpperCamelCase`     | `TcpServer`        |
+| メンバ関数      | `UpperCamelCase()`   | `StartAccept()`    |
+| 変数/引数       | `lower_snake_case`   | `buffer_size`      |
+| 定数            | `kUpperCamelCase`    | `kMaxPayloadSize`  |
+| マクロ          | `PROJECT_MACRO_NAME` | `MYAPP_VERSION`    |
+
+## 12. ドキュメント
+- 公開ヘッダには **Doxygen** 形式コメント。  
+- 例外・戻り値・スレッド安全性を明示。  
+- README にはビルド方法・依存バージョン・ライセンスを記載。
+
+## 13. 依存更新ポリシー
+- SemVer の **minor** までは即日、**major** は影響調査後に反映。  
+- 脆弱性パッチは 72 時間以内に対応。
+
+## 14. マルチプラットフォーム
+- ビルドは **CMake** で行う。
+- テストは **GoogleTest** で行う。
+- テストは **GitHub Actions** で行う。
+- 実装は、**Windows** でも **Linux** でも動作するようにする。
+- 実装は、**Linux** を優先する。
+- 実装は、マルチプラットフォームになる箇所は pimpl idiom を使う。
+
+---
+
+> **付記**  
+> プロジェクト特有のルールや将来的な要件が判明した場合、本ファイルに追記すること。
