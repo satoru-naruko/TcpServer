@@ -15,7 +15,8 @@ TcpServer::TcpServer(unsigned short port, MessageHandler message_handler,
       max_connections_(max_connections),
       message_handler_(std::move(message_handler)),
       io_context_(std::make_unique<boost::asio::io_context>()),
-      running_(false) {
+      running_(false),
+      work_guard_(boost::asio::make_work_guard(*io_context_)) {
   try {
     using tcp = boost::asio::ip::tcp;
     
@@ -48,9 +49,6 @@ void TcpServer::Start(unsigned int thread_count) {
         thread_count = 1;  // ハードウェア情報が取得できない場合は1スレッド
       }
     }
-
-    // work_guardを作成して、io_contextが終了しないようにする
-    work_guard_ = std::make_unique<boost::asio::io_context::work>(*io_context_);
     
     // 新しい接続の受け入れを開始
     StartAccept();

@@ -7,6 +7,7 @@
 #define TCP_SERVER_TCP_SERVER_H_
 
 #include <boost/asio.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 #include <functional>
 #include <memory>
 #include <string>
@@ -97,7 +98,7 @@ class TcpServer {
   std::unordered_set<std::shared_ptr<internal::Connection>> connections_;  ///< アクティブな接続
   std::mutex connections_mutex_;       ///< 接続リスト用ミューテックス
   volatile bool running_;              ///< サーバー実行中フラグ
-  std::unique_ptr<boost::asio::io_context::work> work_guard_;  ///< I/Oコンテキスト終了防止ガード
+  boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard_;  ///< I/Oコンテキスト終了防止ガード
 };
 
 }  // namespace tcp_server
