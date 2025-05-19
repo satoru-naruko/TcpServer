@@ -23,7 +23,7 @@ C++17で実装された多重化TCPサーバーライブラリです。
 ### Visual Studio 2022でのビルド
 
 1. 事前準備
-   ```powershell
+   ```cmd
    # vcpkgをインストール（まだの場合）
    cd C:\
    git clone https://github.com/Microsoft/vcpkg.git
@@ -42,24 +42,38 @@ C++17で実装された多重化TCPサーバーライブラリです。
    ```
 
 2. コマンドラインでのビルド
-   ```powershell
-   # プロジェクトのディレクトリに移動
-   cd C:\work\repos\TcpServer
 
-   # ビルドディレクトリを作成
-   mkdir build
-   cd build
+   a. ビルドとテストを一度に実行（推奨）:
+   ```cmd
+   # デフォルト設定でビルドとテスト（Debug構成）
+   build-and-test.cmd
 
-   # CMakeでプロジェクトを構成（Debug版）
-   cmake .. -G "Visual Studio 17 2022" -A x64 ^
-     -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake ^
-     -DCMAKE_BUILD_TYPE=Debug
+   # Release構成でビルドとテスト
+   build-and-test.cmd Release
 
-   # ビルドを実行
-   cmake --build . --config Debug
+   # カスタムvcpkgパスを指定してビルドとテスト
+   build-and-test.cmd Debug D:\vcpkg
+   ```
 
-   # テストを実行
-   ctest -C Debug --output-on-failure
+   b. ビルドのみを実行:
+   ```cmd
+   # デフォルト設定でビルド（Debug構成）
+   build-utf8.cmd
+
+   # Release構成でビルド
+   build-utf8.cmd Release
+
+   # カスタムvcpkgパスを指定してビルド
+   build-utf8.cmd Debug D:\vcpkg
+   ```
+   
+   c. テストのみを実行:
+   ```cmd
+   # Debugビルドのテストを実行
+   run-tests.cmd
+
+   # Releaseビルドのテストを実行
+   run-tests.cmd Release
    ```
 
 3. Visual Studio IDEでのビルド
@@ -74,13 +88,13 @@ C++17で実装された多重化TCPサーバーライブラリです。
      4. テストエクスプローラーの「すべてのテストを実行」をクリック
 
 4. サンプルの実行
-   ```powershell
+   ```cmd
    # コマンドラインから実行する場合（build/Debugディレクトリから）
-   cd C:\work\repos\TcpServer\build\Debug\examples
-   .\echo_server.exe
+   cd build\Debug\examples
+   echo_server.exe
 
    # ポートを指定する場合
-   .\echo_server.exe 8080
+   echo_server.exe 8080
    ```
 
    Visual Studio IDEから実行する場合：
@@ -89,7 +103,7 @@ C++17で実装された多重化TCPサーバーライブラリです。
 
 5. トラブルシューティング
    - vcpkgのパッケージが見つからない場合：
-     ```powershell
+     ```cmd
      # vcpkgのパッケージリストを更新
      cd C:\vcpkg
      git pull
