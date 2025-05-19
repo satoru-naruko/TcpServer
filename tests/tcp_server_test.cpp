@@ -40,7 +40,7 @@ class TcpServerTest : public ::testing::Test {
       
       // サーバーに接続
       socket.connect(tcp::endpoint(
-          boost::asio::ip::address::from_string("127.0.0.1"), test_port_));
+          boost::asio::ip::make_address("127.0.0.1"), test_port_));
       
       // メッセージを送信
       boost::asio::write(socket, boost::asio::buffer(message));
