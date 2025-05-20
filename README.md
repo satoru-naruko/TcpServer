@@ -129,6 +129,14 @@ cmake ..
 # ビルド
 make
 
+# インストール
+make install
+
+# デフォルトでは /usr/local 以下にインストールされます
+# インストール先を変更する場合は以下のように指定
+cmake -DCMAKE_INSTALL_PREFIX=/path/to/install ..
+make install
+
 # テスト実行
 ctest
 ```
