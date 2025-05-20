@@ -51,14 +51,14 @@ void Connection::StartRead() {
 void Connection::HandleRead(const boost::system::error_code& error,
                             std::size_t bytes_transferred) {
   if (!error) {
-    // データを文字列に変換
+    // Convert data to string
     std::string received_data(read_buffer_.data(), bytes_transferred);
     spdlog::debug("Received: {}", received_data);
 
     try {
-      // メッセージハンドラを呼び出し
+      // Call message handler
       std::string response = message_handler_(received_data);
-      // レスポンスを送信
+      // Send response
       StartWrite(response);
     } catch (const std::exception& ex) {
       spdlog::error("Error processing message: {}", ex.what());
@@ -66,15 +66,15 @@ void Connection::HandleRead(const boost::system::error_code& error,
       return;
     }
 
-    // 次の読み込みを開始
+    // Start next read
     StartRead();
   } else if (error == boost::asio::error::eof ||
              error == boost::asio::error::connection_reset) {
-    // クライアントが接続を閉じた
+    // Connection closed by peer
     spdlog::info("Connection closed by peer");
     Stop();
   } else {
-    // その他のエラー
+    // Other error
     spdlog::error("Read error: {}", error.message());
     Stop();
   }

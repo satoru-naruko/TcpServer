@@ -1,6 +1,6 @@
 /**
  * @file connection.h
- * @brief TCP接続を管理するクラス
+ * @brief Class for managing TCP connections
  */
 
 #ifndef TCP_SERVER_INTERNAL_CONNECTION_H_
@@ -16,9 +16,9 @@ namespace tcp_server {
 namespace internal {
 
 /**
- * @brief TCP接続を管理するクラス
+ * @brief Class for managing TCP connections
  *
- * 単一のクライアント接続を管理し、データの送受信を行う
+ * Manages a single client connection and handles data transmission
  */
 class Connection : public std::enable_shared_from_this<Connection> {
  public:
@@ -26,69 +26,69 @@ class Connection : public std::enable_shared_from_this<Connection> {
   using MessageHandler = std::function<std::string(const std::string&)>;
 
   /**
-   * @brief 接続オブジェクトを作成する
-   * @param io_context Boost.Asioのio_context
-   * @param message_handler 受信メッセージを処理するハンドラ
-   * @return 接続オブジェクトの共有ポインタ
+   * @brief Create a connection object
+   * @param io_context Boost.Asio io_context
+   * @param message_handler Handler for processing received messages
+   * @return Shared pointer to the connection object
    */
   static std::shared_ptr<Connection> Create(
       boost::asio::io_context& io_context,
       MessageHandler message_handler);
 
   /**
-   * @brief TCPソケットの参照を取得
-   * @return TCPソケットの参照
+   * @brief Get reference to TCP socket
+   * @return Reference to TCP socket
    */
   tcp::socket& GetSocket();
 
   /**
-   * @brief 接続の初期化と読み込み開始
+   * @brief Initialize connection and start reading
    */
   void Start();
 
   /**
-   * @brief 接続を閉じる
+   * @brief Close the connection
    */
   void Stop();
 
  private:
   /**
-   * @brief コンストラクタ
-   * @param io_context Boost.Asioのio_context
-   * @param message_handler 受信メッセージを処理するハンドラ
+   * @brief Constructor
+   * @param io_context Boost.Asio io_context
+   * @param message_handler Handler for processing received messages
    */
   Connection(boost::asio::io_context& io_context, MessageHandler message_handler);
 
   /**
-   * @brief 非同期読み込みを開始
+   * @brief Start asynchronous read
    */
   void StartRead();
 
   /**
-   * @brief 読み込み完了時のハンドラ
-   * @param error エラー情報
-   * @param bytes_transferred 転送されたバイト数
+   * @brief Handler for read completion
+   * @param error Error information
+   * @param bytes_transferred Number of bytes transferred
    */
   void HandleRead(const boost::system::error_code& error, std::size_t bytes_transferred);
 
   /**
-   * @brief 非同期書き込みを開始
-   * @param data 送信するデータ
+   * @brief Start asynchronous write
+   * @param data Data to send
    */
   void StartWrite(const std::string& data);
 
   /**
-   * @brief 書き込み完了時のハンドラ
-   * @param error エラー情報
-   * @param bytes_transferred 転送されたバイト数
+   * @brief Handler for write completion
+   * @param error Error information
+   * @param bytes_transferred Number of bytes transferred
    */
   void HandleWrite(const boost::system::error_code& error, std::size_t bytes_transferred);
 
-  tcp::socket socket_;                  ///< TCPソケット
-  MessageHandler message_handler_;      ///< メッセージハンドラ
-  std::vector<char> read_buffer_;       ///< 読み込みバッファ
-  std::string write_buffer_;            ///< 書き込みバッファ
-  static constexpr size_t kBufferSize = 1024;  ///< バッファサイズ
+  tcp::socket socket_;                  ///< TCP socket
+  MessageHandler message_handler_;      ///< Message handler
+  std::vector<char> read_buffer_;       ///< Read buffer
+  std::string write_buffer_;            ///< Write buffer
+  static constexpr size_t kBufferSize = 1024;  ///< Buffer size
 };
 
 }  // namespace internal

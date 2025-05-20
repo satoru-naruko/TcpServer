@@ -20,7 +20,7 @@ TcpServer::TcpServer(unsigned short port, MessageHandler message_handler,
   try {
     using tcp = boost::asio::ip::tcp;
     
-    // acceptorを初期化
+    // Initialize acceptor
     acceptor_ = std::make_unique<tcp::acceptor>(
         *io_context_, tcp::endpoint(tcp::v4(), port_));
         
@@ -42,18 +42,18 @@ void TcpServer::Start(unsigned int thread_count) {
   }
 
   try {
-    // スレッド数を決定
+    // Determine thread count
     if (thread_count == 0) {
       thread_count = std::thread::hardware_concurrency();
       if (thread_count == 0) {
-        thread_count = 1;  // ハードウェア情報が取得できない場合は1スレッド
+        thread_count = 1;  // Use single thread if hardware info is not available
       }
     }
     
-    // 新しい接続の受け入れを開始
+    // Start accepting new connections
     StartAccept();
     
-    // ワーカースレッドを起動
+    // Launch worker threads
     threads_.clear();
     for (unsigned int i = 0; i < thread_count; ++i) {
       threads_.emplace_back([this] {
@@ -69,7 +69,7 @@ void TcpServer::Start(unsigned int thread_count) {
     spdlog::info("TCP server started with {} worker threads", thread_count);
   } catch (const std::exception& e) {
     spdlog::error("Failed to start TCP server: {}", e.what());
-    // 部分的に開始した場合はクリーンアップ
+    // Cleanup if partially started
     Stop();
     throw std::runtime_error(std::string("Failed to start TCP server: ") + e.what());
   }
@@ -82,13 +82,13 @@ void TcpServer::Stop() {
 
   spdlog::info("Stopping TCP server...");
   
-  // work_guardを破棄してio_contextを停止可能にする
+  // Destroy work guard to allow io_context to stop
   work_guard_.reset();
   
-  // io_contextを停止
+  // Stop io_context
   io_context_->stop();
   
-  // すべてのワーカースレッドの終了を待つ
+  // Wait for all worker threads to finish
   for (auto& thread : threads_) {
     if (thread.joinable()) {
       thread.join();
@@ -96,7 +96,7 @@ void TcpServer::Stop() {
   }
   threads_.clear();
   
-  // すべての接続をクローズ
+  // Close all connections
   {
     std::lock_guard<std::mutex> lock(connections_mutex_);
     for (auto& conn : connections_) {
@@ -135,11 +135,11 @@ void TcpServer::HandleAccept(std::shared_ptr<internal::Connection> connection,
                 connection->GetSocket().remote_endpoint().address().to_string(),
                 connection->GetSocket().remote_endpoint().port());
     
-    // 接続を追加して処理を開始
+    // Add connection and start processing
     if (AddConnection(connection)) {
       connection->Start();
     } else {
-      // 最大接続数を超えた場合は接続を拒否
+      // Reject connection if maximum connections reached
       spdlog::warn("Maximum connections reached, rejecting new connection");
       connection->Stop();
     }
@@ -147,19 +147,19 @@ void TcpServer::HandleAccept(std::shared_ptr<internal::Connection> connection,
     spdlog::error("Accept error: {}", error.message());
   }
   
-  // 次の接続を受け入れる
+  // Accept next connection
   StartAccept();
 }
 
 bool TcpServer::AddConnection(std::shared_ptr<internal::Connection> connection) {
   std::lock_guard<std::mutex> lock(connections_mutex_);
   
-  // 最大接続数をチェック
+  // Check maximum connections
   if (connections_.size() >= max_connections_) {
     return false;
   }
   
-  // 接続を保存
+  // Store connection
   connections_.insert(connection);
   return true;
 }
