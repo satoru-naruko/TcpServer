@@ -13,7 +13,7 @@ using boost::asio::ip::tcp;
 class TcpServerTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    // テスト用サーバーを作成
+    // Create test server
     server_ = std::make_unique<TcpServer>(test_port_, [](const std::string& message) {
       if (message == "ping") {
         return "pong";
@@ -26,26 +26,26 @@ class TcpServerTest : public ::testing::Test {
   }
 
   void TearDown() override {
-    // テスト後にサーバーを停止
+    // Stop server after test
     if (server_ && server_->IsRunning()) {
       server_->Stop();
     }
   }
 
-  // テスト用のクライアント関数
+  // Client function for testing
   std::string SendMessage(const std::string& message) {
     try {
       boost::asio::io_context io_context;
       tcp::socket socket(io_context);
       
-      // サーバーに接続
+      // Connect to server
       socket.connect(tcp::endpoint(
           boost::asio::ip::make_address("127.0.0.1"), test_port_));
       
-      // メッセージを送信
+      // Send message
       boost::asio::write(socket, boost::asio::buffer(message));
       
-      // レスポンスを受信
+      // Receive response
       std::vector<char> reply(1024);
       size_t reply_length = socket.read_some(boost::asio::buffer(reply));
       
@@ -59,49 +59,49 @@ class TcpServerTest : public ::testing::Test {
   std::unique_ptr<TcpServer> server_;
 };
 
-// サーバーの起動と停止をテスト
+// Test server start and stop
 TEST_F(TcpServerTest, StartStopTest) {
   ASSERT_FALSE(server_->IsRunning());
   
-  // サーバーを起動
+  // Start server
   server_->Start(1);
   ASSERT_TRUE(server_->IsRunning());
   
-  // サーバーを停止
+  // Stop server
   server_->Stop();
   ASSERT_FALSE(server_->IsRunning());
 }
 
-// 基本的なメッセージの送受信をテスト
+// Test basic message communication
 TEST_F(TcpServerTest, BasicCommunication) {
-  // サーバーを起動
+  // Start server
   server_->Start(1);
   
-  // 少し待ってサーバーが起動するのを待つ
+  // Wait a bit for the server to start
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
   
-  // pingメッセージを送信
+  // Send ping message
   std::string response = SendMessage("ping");
   EXPECT_EQ("pong", response);
   
-  // helloメッセージを送信
+  // Send hello message
   response = SendMessage("hello");
   EXPECT_EQ("world", response);
   
-  // 未知のメッセージを送信
+  // Send unknown message
   response = SendMessage("unknown");
   EXPECT_EQ("unknown command", response);
 }
 
-// 複数接続のテスト
+// Test multiple connections
 TEST_F(TcpServerTest, MultipleConnections) {
-  // サーバーを起動（2スレッド）
+  // Start server (2 threads)
   server_->Start(2);
   
-  // 少し待ってサーバーが起動するのを待つ
+  // Wait a bit for the server to start
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
   
-  // 複数のクライアントを同時に実行
+  // Run multiple clients simultaneously
   constexpr int client_count = 5;
   std::vector<std::future<std::string>> futures;
   
@@ -111,7 +111,7 @@ TEST_F(TcpServerTest, MultipleConnections) {
     }));
   }
   
-  // すべてのレスポンスを確認
+  // Check all responses
   for (auto& f : futures) {
     EXPECT_EQ("pong", f.get());
   }
