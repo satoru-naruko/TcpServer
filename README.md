@@ -46,34 +46,34 @@ C++17で実装された多重化TCPサーバーライブラリです。
    a. ビルドとテストを一度に実行（推奨）:
    ```cmd
    # デフォルト設定でビルドとテスト（Debug構成）
-   build-and-test.cmd
+   scripts\windows\build\build-and-test.cmd
 
    # Release構成でビルドとテスト
-   build-and-test.cmd Release
+   scripts\windows\build\build-and-test.cmd Release
 
    # カスタムvcpkgパスを指定してビルドとテスト
-   build-and-test.cmd Debug D:\vcpkg
+   scripts\windows\build\build-and-test.cmd Debug C:\work\vcpkg
    ```
 
    b. ビルドのみを実行:
    ```cmd
    # デフォルト設定でビルド（Debug構成）
-   build-utf8.cmd
+   scripts\windows\build\build-utf8.cmd
 
    # Release構成でビルド
-   build-utf8.cmd Release
+   scripts\windows\build\build-utf8.cmd Release
 
    # カスタムvcpkgパスを指定してビルド
-   build-utf8.cmd Debug D:\vcpkg
+   scripts\windows\build\build-utf8.cmd Debug C:\work\vcpkg
    ```
    
    c. テストのみを実行:
    ```cmd
    # Debugビルドのテストを実行
-   run-tests.cmd
+   scripts\windows\test\run-tests.cmd
 
    # Releaseビルドのテストを実行
-   run-tests.cmd Release
+   scripts\windows\test\run-tests.cmd Release
    ```
 
 3. Visual Studio IDEでのビルド
@@ -105,7 +105,7 @@ C++17で実装された多重化TCPサーバーライブラリです。
    - vcpkgのパッケージが見つからない場合：
      ```cmd
      # vcpkgのパッケージリストを更新
-     cd C:\vcpkg
+     cd C:\work\vcpkg
      git pull
      .\vcpkg update
      ```
@@ -195,6 +195,13 @@ TcpServer/
 │   └── tcp_server/
 │       ├── tcp_server.h     # メインTCPサーバークラス
 │       └── version.h        # バージョン情報
+├── scripts/                 # ビルドスクリプト
+│   └── windows/            # Windows用スクリプト
+│       ├── build/          # ビルド関連スクリプト
+│       │   ├── build-utf8.cmd
+│       │   └── build-and-test.cmd
+│       └── test/           # テスト関連スクリプト
+│           └── run-tests.cmd
 ├── src/                     # ソースファイル
 │   ├── tcp_server.cpp       # TCPサーバーの実装
 │   └── internal/            # 内部実装のディレクトリ
