@@ -1,3 +1,0 @@
-/home/satoru/TcpServer/example_with_lib/build/CMakeFiles/application_server.dir
-/home/satoru/TcpServer/example_with_lib/build/CMakeFiles/edit_cache.dir
-/home/satoru/TcpServer/example_with_lib/build/CMakeFiles/rebuild_cache.dir
