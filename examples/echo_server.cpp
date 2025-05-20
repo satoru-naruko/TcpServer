@@ -1,18 +1,13 @@
 #include <iostream>
 #include <string>
-#include <csignal>
 #include <atomic>
+#include <thread>
 
+#include <boost/asio.hpp>
 #include "tcp_server/tcp_server.h"
 #include <spdlog/spdlog.h>
 
 std::atomic<bool> running(true);
-
-// シグナルハンドラ
-void signal_handler(int signal) {
-  spdlog::info("Signal {} received, shutting down...", signal);
-  running = false;
-}
 
 int main(int argc, char* argv[]) {
   try {
@@ -27,9 +22,20 @@ int main(int argc, char* argv[]) {
       port = static_cast<unsigned short>(std::stoi(argv[1]));
     }
     
-    // シグナルハンドラを設定（Ctrl+Cなどで適切に終了するため）
-    std::signal(SIGINT, signal_handler);
-    std::signal(SIGTERM, signal_handler);
+    // Boost.Asioのio_contextを作成
+    boost::asio::io_context io_context;
+    
+    // シグナルハンドラを設定（クロスプラットフォーム対応）
+    boost::asio::signal_set signals(io_context, SIGINT, SIGTERM);
+    signals.async_wait([&](const boost::system::error_code& error, int signal_number) {
+      spdlog::info("Signal {} received, shutting down...", signal_number);
+      running = false;
+    });
+    
+    // 別スレッドでio_contextを実行
+    std::thread io_thread([&io_context]() {
+      io_context.run();
+    });
     
     // メッセージハンドラ関数（受信したメッセージをそのまま返す）
     auto message_handler = [](const std::string& message) -> std::string {
@@ -52,6 +58,12 @@ int main(int argc, char* argv[]) {
     spdlog::info("Stopping echo server...");
     server.Stop();
     spdlog::info("Echo server stopped.");
+    
+    // io_contextを停止し、io_threadが終了するのを待つ
+    io_context.stop();
+    if (io_thread.joinable()) {
+      io_thread.join();
+    }
     
     return 0;
   } catch (const std::exception& e) {
