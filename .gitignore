@@ -1,3 +1,6 @@
 /.cursor
 /.cusorrules
-build/
+/build/
+/examples/build/
+/tests/build/
+/example_with_lib/build/
