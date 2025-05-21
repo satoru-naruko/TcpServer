@@ -1,179 +1,179 @@
 # TCP Server Library
 
-C++17で実装された多重化TCPサーバーライブラリです。
+A multiplexed TCP server library implemented in C++17.
 
-## 機能
+## Features
 
-- 複数のクライアント接続を同時に処理（最大8接続）
-- 非同期I/O処理（Boost.Asio使用）
-- マルチスレッドワーカープール
-- カスタムメッセージハンドラによる柔軟なレスポンス処理
-- クロスプラットフォーム対応（Windows/Linux）
+- Handles multiple client connections simultaneously (up to 8 connections)
+- Asynchronous I/O processing (using Boost.Asio)
+- Multithreaded worker pool
+- Flexible response processing via custom message handlers
+- Cross-platform support (Windows/Linux)
 
-## 必要条件
+## Requirements
 
-- C++17対応コンパイラ
-- CMake 3.20以上
-- Boost 1.71.0以上
+- C++17 compatible compiler
+- CMake 3.20 or later
+- Boost 1.71.0 or later
 - spdlog
-- GoogleTest（テスト実行時のみ）
+- GoogleTest (for running tests only)
 
-## ビルド方法
+## Build Instructions
 
-### Visual Studio 2022でのビルド
+### Building with Visual Studio 2022
 
-1. 事前準備
+1. Preparation
    ```cmd
-   # vcpkgをインストール（まだの場合）
+   # Install vcpkg (if not already installed)
    cd C:\
    git clone https://github.com/Microsoft/vcpkg.git
    cd vcpkg
    .\bootstrap-vcpkg.bat
    .\vcpkg integrate install
 
-   # 必要なパッケージをインストール
+   # Install required packages
    .\vcpkg install boost:x64-windows
    .\vcpkg install spdlog:x64-windows
    .\vcpkg install gtest:x64-windows
 
-   # 環境変数の設定
-   # システムの環境変数に以下を追加（コントロールパネルから設定）
+   # Set environment variables
+   # Add the following to your system environment variables (via Control Panel)
    # VCPKG_ROOT = C:\vcpkg
    ```
 
-2. コマンドラインでのビルド
+2. Building from the Command Line
 
-   a. ビルドとテストを一度に実行（推奨）:
+   a. Build and test in one step (recommended):
    ```cmd
-   # デフォルト設定でビルドとテスト（Debug構成）
+   # Build and test with default settings (Debug configuration)
    scripts\windows\build\build-and-test.cmd
 
-   # Release構成でビルドとテスト
+   # Build and test with Release configuration
    scripts\windows\build\build-and-test.cmd Release
 
-   # カスタムvcpkgパスを指定してビルドとテスト
+   # Specify a custom vcpkg path for build and test
    scripts\windows\build\build-and-test.cmd Debug C:\work\vcpkg
    ```
 
-   b. ビルドのみを実行:
+   b. Build only:
    ```cmd
-   # デフォルト設定でビルド（Debug構成）
+   # Build with default settings (Debug configuration)
    scripts\windows\build\build-utf8.cmd
 
-   # Release構成でビルド
+   # Build with Release configuration
    scripts\windows\build\build-utf8.cmd Release
 
-   # カスタムvcpkgパスを指定してビルド
+   # Specify a custom vcpkg path for build
    scripts\windows\build\build-utf8.cmd Debug C:\work\vcpkg
    ```
    
-   c. テストのみを実行:
+   c. Run tests only:
    ```cmd
-   # Debugビルドのテストを実行
+   # Run tests for Debug build
    scripts\windows\test\run-tests.cmd
 
-   # Releaseビルドのテストを実行
+   # Run tests for Release build
    scripts\windows\test\run-tests.cmd Release
    ```
 
-3. Visual Studio IDEでのビルド
-   - Visual Studio 2022を起動
-   - メニューから「ファイル」→「開く」→「CMake」を選択
-   - プロジェクトのルートディレクトリにある`CMakeLists.txt`を選択
-   - CMakeの設定が完了するまで待機（数分かかる場合があります）
-   - 以下の手順でビルドとテストを実行：
-     1. ツールバーの構成を`x64-Debug`に設定
-     2. 「ビルド」→「すべてビルド」を選択（または F7 キー）
-     3. 「テスト」→「テストエクスプローラー」を開く
-     4. テストエクスプローラーの「すべてのテストを実行」をクリック
+3. Building with Visual Studio IDE
+   - Launch Visual Studio 2022
+   - From the menu, select "File" → "Open" → "CMake..."
+   - Select `CMakeLists.txt` in the project root directory
+   - Wait for CMake configuration to complete (may take a few minutes)
+   - To build and test:
+     1. Set the toolbar configuration to `x64-Debug`
+     2. Select "Build" → "Build All" (or press F7)
+     3. Open "Test" → "Test Explorer"
+     4. Click "Run All Tests" in the Test Explorer
 
-4. サンプルの実行
+4. Running the Sample
    ```cmd
-   # コマンドラインから実行する場合（build/Debugディレクトリから）
+   # From the command line (from build/Debug directory)
    cd build\Debug\examples
    echo_server.exe
 
-   # ポートを指定する場合
+   # To specify a port
    echo_server.exe 8080
    ```
 
-   Visual Studio IDEから実行する場合：
-   - ソリューションエクスプローラーで`examples/echo_server`を右クリック
-   - 「デバッグ」→「新しいインスタンスとして開始」を選択
+   To run from Visual Studio IDE:
+   - In Solution Explorer, right-click `examples/echo_server`
+   - Select "Debug" → "Start New Instance"
 
-5. トラブルシューティング
-   - vcpkgのパッケージが見つからない場合：
+5. Troubleshooting
+   - If vcpkg packages are not found:
      ```cmd
-     # vcpkgのパッケージリストを更新
+     # Update vcpkg package list
      cd C:\work\vcpkg
      git pull
      .\vcpkg update
      ```
-   - CMakeがvcpkgを見つけられない場合：
-     - `CMakeSettings.json`の`CMAKE_TOOLCHAIN_FILE`パスが正しいか確認
-     - 環境変数`VCPKG_ROOT`が正しく設定されているか確認
+   - If CMake cannot find vcpkg:
+     - Check that the `CMAKE_TOOLCHAIN_FILE` path in `CMakeSettings.json` is correct
+     - Ensure the `VCPKG_ROOT` environment variable is set correctly
 
-### WSL（Windows Subsystem for Linux）でのビルド
+### Building with WSL (Windows Subsystem for Linux)
 
 ```bash
-# 必要なパッケージをインストール
+# Install required packages
 sudo apt update
 sudo apt install build-essential cmake libboost-all-dev libspdlog-dev libgtest-dev
 
-# ビルドディレクトリを作成して移動
+# Create and move to build directory
 mkdir build && cd build
 
-# CMakeでプロジェクトを構成
+# Configure project with CMake
 cmake ..
 
-# ビルド
+# Build
 make
 
-# インストール
+# Install
 make install
 
-# デフォルトでは /usr/local 以下にインストールされます
-# インストール先を変更する場合は以下のように指定
+# By default, installs under /usr/local
+# To change the install location, specify as follows
 cmake -DCMAKE_INSTALL_PREFIX=/path/to/install ..
 make install
 
-# テスト実行
+# Run tests
 ctest
 ```
 
-### 実行例
+### Example Usage
 
-エコーサーバーの例を実行するには：
+To run the echo server example:
 
 ```bash
-# ビルドディレクトリから
+# From the build directory
 ./examples/echo_server
 
-# ポートを指定する場合
+# To specify a port
 ./examples/echo_server 8080
 ```
 
-## 使用方法
+## Usage
 
-サーバーを作成して実行する例：
+Example of creating and running a server:
 
 ```cpp
 #include "tcp_server/tcp_server.h"
 #include <string>
 
 int main() {
-  // メッセージハンドラを定義
+  // Define message handler
   auto message_handler = [](const std::string& message) -> std::string {
-    return "応答: " + message;
+    return "Response: " + message;
   };
   
-  // ポート12345でTCPサーバーを作成
+  // Create TCP server on port 12345
   tcp_server::TcpServer server(12345, message_handler);
   
-  // サーバーを起動（2スレッドで）
+  // Start server (with 2 threads)
   server.Start(2);
   
-  // メインスレッドを停止させないためのループ
+  // Loop to prevent main thread from exiting
   while (server.IsRunning()) {
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
@@ -182,35 +182,35 @@ int main() {
 }
 ```
 
-## ライセンス
+## License
 
-MITライセンス
+MIT License
 
-## プロジェクト構造
+## Project Structure
 
 ```
 TcpServer/
-├── CMakeLists.txt           # メインのCMakeファイル
-├── include/                 # 公開ヘッダー
+├── CMakeLists.txt           # Main CMake file
+├── include/                 # Public headers
 │   └── tcp_server/
-│       ├── tcp_server.h     # メインTCPサーバークラス
-│       └── version.h        # バージョン情報
-├── scripts/                 # ビルドスクリプト
-│   └── windows/            # Windows用スクリプト
-│       ├── build/          # ビルド関連スクリプト
+│       ├── tcp_server.h     # Main TCP server class
+│       └── version.h        # Version info
+├── scripts/                 # Build scripts
+│   └── windows/            # Windows scripts
+│       ├── build/          # Build scripts
 │       │   ├── build-utf8.cmd
 │       │   └── build-and-test.cmd
-│       └── test/           # テスト関連スクリプト
+│       └── test/           # Test scripts
 │           └── run-tests.cmd
-├── src/                     # ソースファイル
-│   ├── tcp_server.cpp       # TCPサーバーの実装
-│   └── internal/            # 内部実装のディレクトリ
-│       ├── connection.h     # 接続クラスのヘッダー
-│       └── connection.cpp   # 接続クラスの実装
-├── tests/                   # テストディレクトリ
-│   ├── CMakeLists.txt       # テスト用CMakeファイル
-│   └── tcp_server_test.cpp  # ユニットテスト
-└── examples/                # サンプルコード
-    ├── CMakeLists.txt       # サンプル用CMakeファイル
-    └── echo_server.cpp      # エコーサーバーの例
+├── src/                     # Source files
+│   ├── tcp_server.cpp       # TCP server implementation
+│   └── internal/            # Internal implementation
+│       ├── connection.h     # Connection class header
+│       └── connection.cpp   # Connection class implementation
+├── tests/                   # Test directory
+│   ├── CMakeLists.txt       # Test CMake file
+│   └── tcp_server_test.cpp  # Unit tests
+└── examples/                # Sample code
+    ├── CMakeLists.txt       # Sample CMake file
+    └── echo_server.cpp      # Echo server example
 ```
