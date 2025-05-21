@@ -28,6 +28,7 @@ int main(int argc, char* argv[]) {
     // Set up signal handler (cross-platform)
     boost::asio::signal_set signals(io_context, SIGINT, SIGTERM);
     signals.async_wait([&](const boost::system::error_code& error, int signal_number) {
+      (void)error;
       spdlog::info("Signal {} received, shutting down...", signal_number);
       running = false;
     });
