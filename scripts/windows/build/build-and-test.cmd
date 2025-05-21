@@ -1,5 +1,5 @@
-@echo off
-REM ビルドとテスト実行を組み合わせたスクリプト
+@echo on
+REM build and test script
 chcp 65001 > nul
 
 set BUILD_TYPE=Debug
@@ -11,13 +11,13 @@ if not "%2"=="" set VCPKG_ROOT=%2
 echo BUILD_TYPE=%BUILD_TYPE%
 echo VCPKG_ROOT=%VCPKG_ROOT%
 
-REM ビルド実行
-call build-utf8.cmd %BUILD_TYPE% %VCPKG_ROOT%
+REM build start
+call "%~dp0build-utf8.cmd" %BUILD_TYPE% %VCPKG_ROOT%
 if errorlevel 1 goto error
 
-REM テスト実行
+REM  test start
 echo Running tests directly...
-call ..\..\test\run-tests.cmd %BUILD_TYPE%
+call "%~dp0..\test\run-tests.cmd" %BUILD_TYPE%
 if errorlevel 1 goto test_fail
 
 echo Build and tests successful!
